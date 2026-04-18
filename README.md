@@ -118,6 +118,41 @@ POST to http://localhost:8000/api/profiles/ with body {"name": "john"}
 
 ---
 
+## Deploying with Supabase (Postgres)
+
+This project supports Postgres via `DATABASE_URL`. Supabase is a good hosted Postgres option.
+
+1. Create a project on Supabase (https://supabase.com) and note the Database connection string.
+
+2. In your Supabase project dashboard: Settings → Database → Connection string → copy the `Connection string` (example: `postgres://USER:PASS@HOST:PORT/DBNAME`).
+
+3. In your Vercel project settings, add the following Environment Variables:
+
+- `DATABASE_URL` = (the Supabase connection string)
+- `SECRET_KEY` = (your Django secret key)
+- `DEBUG` = `False`
+
+4. Run migrations locally (or from a machine that has `DATABASE_URL` set to Supabase) to create tables:
+
+```bash
+pip install -r requirements.txt
+export DATABASE_URL="postgres://USER:PASS@HOST:PORT/DBNAME"
+python manage.py migrate
+```
+
+On Windows (PowerShell):
+
+```powershell
+$Env:DATABASE_URL = "postgres://USER:PASS@HOST:PORT/DBNAME"
+python manage.py migrate
+```
+
+5. Deploy to Vercel. The app will use `DATABASE_URL` in production and fall back to SQLite locally.
+
+Notes:
+- Do not store secrets in `vercel.json`; use the Vercel Dashboard for env variables.
+- You can also use Supabase's SQL editor to run migrations if you prefer.
+
 ## Author
 
 Name: [Your Name]
