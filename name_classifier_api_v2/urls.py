@@ -20,7 +20,6 @@ from django.urls import include, path
 from api.views import health
 
 urlpatterns = [
-    path("", health),
     path("admin/", admin.site.urls),
     path("api/", include("api.urls")),
 ]

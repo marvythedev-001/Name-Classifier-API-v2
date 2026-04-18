@@ -54,22 +54,7 @@ def create_profile(request):
     
 
 
-@api_view(["GET"])
-def health(request):
-    return Response(
-        {
-            "status": "success",
-            "message": "Name Classifier API v2",
-            "endpoints": {
-                "create_profile": "/api/profiles/ (POST)",
-                "list_profiles": "/api/profiles (GET)",
-                "get_profile": "/api/profiles/{id} (GET)",
-                "delete_profile": "/api/profiles/{id}/delete (DELETE)"
-            }
-        }
-    )
-
-    
+   
 @api_view(["GET"])
 def get_profile(request, id):
     try:
