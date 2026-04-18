@@ -153,6 +153,22 @@ Notes:
 - Do not store secrets in `vercel.json`; use the Vercel Dashboard for env variables.
 - You can also use Supabase's SQL editor to run migrations if you prefer.
 
+## Vercel Deployment Files
+
+The following files are configured for Vercel deployment:
+
+- `vercel.json` - Vercel configuration with Python runtime and routing
+- `runtime.txt` - Specifies Python 3.12
+- `requirements.txt` - All Python dependencies including PostgreSQL support
+- `.vercelignore` - Excludes unnecessary files from deployment
+
+## Deploy Steps
+
+1. Install Vercel CLI: `npm install -g vercel`
+2. Login to Vercel: `vercel login`
+3. Deploy: `vercel --prod` (or run the `vercel-deploy.sh` script)
+4. Set environment variables in Vercel dashboard as described above
+
 ## Author
 
 Name: [Your Name]
