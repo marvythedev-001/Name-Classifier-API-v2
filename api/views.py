@@ -68,9 +68,45 @@ def get_profile(request, id):
     })
     
 
-@api_view(["GET"])
-def list_profiles(request):
+@api_view(["GET", "POST"])
+def profiles(request):
+    # Handle POST -> create profile
+    if request.method == "POST":
+        name = request.data.get("name")
 
+        if name is None or name == "":
+            return error("Missing or empty name", 400)
+
+        if not isinstance(name, str):
+            return error("Invalid type", 422)
+
+        name = name.lower()
+
+        existing = Profile.objects.filter(name=name).first()
+
+        if existing:
+            return Response({
+                "status": "success",
+                "message": "Profile already exists",
+                "data": ProfileSerializer(existing).data
+            })
+
+        try:
+            data = fetch_data(name)
+        except Exception as e:
+            return error(f"{str(e)} returned an invalid response", 502)
+
+        profile = Profile.objects.create(name=name, **data)
+
+        return Response(
+            {
+                "status": "success",
+                "data": ProfileSerializer(profile).data,
+            },
+            status=201,
+        )
+
+    # Handle GET -> list profiles with optional filters
     qs = Profile.objects.all()
 
     gender = request.GET.get("gender")
