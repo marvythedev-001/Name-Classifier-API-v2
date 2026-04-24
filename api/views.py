@@ -5,6 +5,8 @@ from api.models import Profile
 from api.serializers import ProfileSerializer
 from api.services import fetch_data
 from rest_framework.decorators import api_view
+
+from django.core.paginator import Paginator
 # Create your views here.
 
 
@@ -150,3 +152,95 @@ def delete_profile(request, id):
 
     profile.delete()
     return Response(status=204)
+
+
+@api_view(["GET"])
+def list_profiles(request):
+
+    qs = Profile.objects.all()
+
+    # ---------- FILTERS ----------
+    gender = request.GET.get("gender")
+    age_group = request.GET.get("age_group")
+    country_id = request.GET.get("country_id")
+
+    min_age = request.GET.get("min_age")
+    max_age = request.GET.get("max_age")
+
+    min_gp = request.GET.get("min_gender_probability")
+    min_cp = request.GET.get("min_country_probability")
+
+    if gender:
+        qs = qs.filter(gender__iexact=gender)
+
+    if age_group:
+        qs = qs.filter(age_group__iexact=age_group)
+
+    if country_id:
+        qs = qs.filter(country_id__iexact=country_id)
+
+    if min_age:
+        qs = qs.filter(age__gte=int(min_age))
+
+    if max_age:
+        qs = qs.filter(age__lte=int(max_age))
+
+    if min_gp:
+        qs = qs.filter(gender_probability__gte=float(min_gp))
+
+    if min_cp:
+        qs = qs.filter(country_probability__gte=float(min_cp))
+
+    # ---------- SORTING ----------
+    sort_by = request.GET.get("sort_by", "created_at")
+    order = request.GET.get("order", "asc")
+
+    allowed = ["age", "created_at", "gender_probability"]
+
+    if sort_by not in allowed:
+        return error("Invalid query parameters")
+
+    if order == "desc":
+        sort_by = f"-{sort_by}"
+
+    qs = qs.order_by(sort_by)
+
+    # ---------- PAGINATION ----------
+    page = int(request.GET.get("page", 1))
+    limit = min(int(request.GET.get("limit", 10)), 50)
+
+    paginator = Paginator(qs, limit)
+    page_obj = paginator.get_page(page)
+
+    data = list(page_obj.object_list.values())
+
+    return Response({
+        "status": "success",
+        "page": page,
+        "limit": limit,
+        "total": paginator.count,
+        "data": data
+    })
+    
+    
+from .parser import parse_query
+
+
+@api_view(["GET"])
+def search_profiles(request):
+
+    q = request.GET.get("q")
+
+    if not q:
+        return error("Missing or empty parameter")
+
+    filters = parse_query(q)
+
+    if filters is None:
+        return error("Unable to interpret query")
+
+    request.GET._mutable = True
+    for k, v in filters.items():
+        request.GET[k] = v
+
+    return list_profiles(request)
