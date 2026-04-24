@@ -232,7 +232,7 @@ from .parser import parse_query
 
 
 @api_view(["GET"])
-def search_profiles(request):
+def search_proles(request):
 
     q = request.GET.get("q")
 
@@ -249,3 +249,52 @@ def search_profiles(request):
         request.GET[k] = v
 
     return list_profiles(request)
+
+
+@api_view(["GET"])
+def search_profiles(request):
+
+    q = request.GET.get("q")
+
+    if not q:
+        return error("Missing or empty parameter", 400)
+
+    filters = parse_query(q)
+
+    if filters is None:
+        return error("Unable to interpret query", 400)
+
+    # Apply filters directly
+    qs = Profile.objects.all()
+
+    if "gender" in filters:
+        qs = qs.filter(gender__iexact=filters["gender"])
+
+    if "age_group" in filters:
+        qs = qs.filter(age_group__iexact=filters["age_group"])
+
+    if "country_id" in filters:
+        qs = qs.filter(country_id__iexact=filters["country_id"])
+
+    if "min_age" in filters:
+        qs = qs.filter(age__gt=filters["min_age"])
+
+    if "max_age" in filters:
+        qs = qs.filter(age__lte=filters["max_age"])
+
+    # Pagination (reuse logic safely)
+    page = int(request.GET.get("page", 1))
+    limit = min(int(request.GET.get("limit", 10)), 50)
+
+    paginator = Paginator(qs, limit)
+    page_obj = paginator.get_page(page)
+
+    data = list(page_obj.object_list.values())
+
+    return Response({
+        "status": "success",
+        "page": page,
+        "limit": limit,
+        "total": paginator.count,
+        "data": data
+    })
