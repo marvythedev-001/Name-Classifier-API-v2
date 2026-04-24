@@ -198,7 +198,12 @@ def list_profiles(request):
     allowed = ["age", "created_at", "gender_probability"]
 
     if sort_by not in allowed:
-        return error("Invalid query parameters")
+        return error("Invalid query parameters", 400)
+    
+    order = request.GET.get("order", "asc")
+
+    if order not in ["asc", "desc"]:
+        return error("Invalid query parameters", 400)
 
     if order == "desc":
         sort_by = f"-{sort_by}"
@@ -210,7 +215,7 @@ def list_profiles(request):
     limit = min(int(request.GET.get("limit", 10)), 50)
 
     paginator = Paginator(qs, limit)
-    page_obj = paginator.get_page(page)
+    page_obj = paginator.get_page(page)    
 
     data = list(page_obj.object_list.values())
 
@@ -232,12 +237,12 @@ def search_profiles(request):
     q = request.GET.get("q")
 
     if not q:
-        return error("Missing or empty parameter")
+        return error("Missing or empty parameter", 400)
 
     filters = parse_query(q)
 
     if filters is None:
-        return error("Unable to interpret query")
+        return error("Unable to interpret query", 400)
 
     request.GET._mutable = True
     for k, v in filters.items():
