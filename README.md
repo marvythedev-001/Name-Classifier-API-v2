@@ -169,6 +169,37 @@ The following files are configured for Vercel deployment:
 3. Deploy: `vercel --prod` (or run the `vercel-deploy.sh` script)
 4. Set environment variables in Vercel dashboard as described above
 
+
+
+Parser Design Decisions
+Rule-based parsing ensures deterministic behavior.
+No AI inference is used.
+Parsing output reuses the main filtering engine.
+Prevents duplicated query logic.
+Keeps implementation fast and predictable.
+Limitations of the Parser
+
+The parser intentionally keeps scope limited.
+
+Current limitations include:
+
+Only predefined countries are supported.
+No spelling correction.
+Cannot interpret complex grammar.
+No synonym detection (e.g., "guys", "ladies").
+Does not support multiple conflicting constraints.
+English language only.
+Cannot interpret statistical or comparative queries.
+
+These constraints were accepted to maintain rule-based determinism and predictable performance.
+
+Performance Considerations
+Filtering executed at database level.
+Sorting performed via SQL ORDER BY.
+Pagination applied before serialization.
+Unique constraint prevents duplicate seed inserts.
+Avoids unnecessary full-table scans.
+
 ## Author
 
 Name: [Your Name]
