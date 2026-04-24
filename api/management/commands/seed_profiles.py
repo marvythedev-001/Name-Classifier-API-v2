@@ -1,21 +1,21 @@
 import json
 from django.core.management.base import BaseCommand
-from profiles.models import Profile
+from api.models import Profile
 
 
 class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
 
-        with open("profiles_2026.json") as f:
+        with open("seed_profiles.json") as f:
             data = json.load(f)
-
+            
         created = 0
 
-        for item in data:
-
+        items = data.get("profiles", [])
+        for item in items:
             obj, was_created = Profile.objects.get_or_create(
-                name=item["name"],
+                name=item.get("name"),
                 defaults={
                     "gender": item["gender"],
                     "gender_probability": item["gender_probability"],

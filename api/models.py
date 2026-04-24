@@ -13,7 +13,7 @@ class Profile(models.Model):
     GENDER = (("male", "MALE"), ("female", "FEMALE"))
     gender = models.CharField(max_length=10, choices=GENDER)
     gender_probability = models.FloatField()
-    sample_size = models.IntegerField()
+    # sample_size = models.IntegerField()
 
     age = models.IntegerField()
     age_group = models.CharField(max_length=20)
